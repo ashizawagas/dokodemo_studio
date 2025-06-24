@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タブレット・デ・スタジオ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section h2 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.3em;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px 0 rgba(255, 107, 107, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px 0 rgba(255, 107, 107, 0.4);
+        }
+
+        button:disabled {
+            background: linear-gradient(45deg, #999, #777);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .record-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            box-shadow: 0 4px 15px 0 rgba(78, 205, 196, 0.3);
+        }
+
+        .record-btn:hover {
+            box-shadow: 0 8px 25px 0 rgba(78, 205, 196, 0.4);
+        }
+
+        .record-btn.recording {
+            background: linear-gradient(45deg, #ff4757, #ff3742);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        input[type="file"] {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .track-list {
+            margin-top: 20px;
+        }
+
+        .track-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .track-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .track-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .track-controls button {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        input[type="range"]:hover {
+            opacity: 1;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            cursor: pointer;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .status.recording {
+            background: rgba(255, 71, 87, 0.2);
+            border: 1px solid #ff4757;
+        }
+
+        .status.ready {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        .export-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .export-btn {
+            background: linear-gradient(45deg, #feca57, #ff9ff3);
+            box-shadow: 0 4px 15px 0 rgba(254, 202, 87, 0.3);
+            font-size: 18px;
+            padding: 15px 30px;
+        }
+
+        .export-btn:hover {
+            box-shadow: 0 8px 25px 0 rgba(254, 202, 87, 0.4);
+        }
+
+        .export-controls {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .export-controls h3 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 タブレット・デ・スタジオ</h1>
+        
+        <div class="section">
+            <h2>🎧 背景音楽</h2>
+            <input type="file" id="musicFile" accept="audio/*" />
+            <div class="controls">
+                <button id="playMusicBtn">再生</button>
+                <button id="pauseMusicBtn">一時停止</button>
+                <button id="stopMusicBtn">停止</button>
+                <button id="playAndRecordBtn" class="record-btn">🎵 再生＆録音開始</button>
+            </div>
+            <div class="volume-control">
+                <span>音量:</span>
+                <input type="range" id="musicVolume" min="0" max="100" value="50" />
+                <span id="musicVolumeValue">50%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="musicProgress" class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎤 録音</h2>
+            <div id="recordingStatus" class="status ready">準備完了</div>
+            <div class="controls">
+                <button id="recordBtn" class="record-btn">録音のみ開始</button>
+                <button id="stopRecordBtn" disabled>録音停止</button>
+            </div>
+            <p style="margin-top: 15px; opacity: 0.8; font-size: 14px;">
+                💡 ヒント: 「再生＆録音開始」で音楽と録音を同時開始できます
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>🎵 録音トラック</h2>
+            <div id="trackList" class="track-list">
+                <p>まだトラックがありません</p>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <div class="export-controls">
+                <h3>🎛️ 合成設定</h3>
+                <div class="volume-control">
+                    <span>背景音楽音量:</span>
+                    <input type="range" id="exportMusicVolume" min="0" max="100" value="50" />
+                    <span id="exportMusicVolumeValue">50%</span>
+                </div>
+                <div class="volume-control">
+                    <span>録音音量:</span>
+                    <input type="range" id="exportRecordVolume" min="0" max="100" value="100" />
+                    <span id="exportRecordVolumeValue">100%</span>
+                </div>
+            </div>
+            <button id="exportBtn" class="export-btn" disabled>🎵 合成音楽をダウンロード</button>
+        </div>
+    </div>
+
+    <script>
+        class MultiTrackRecorder {
+            constructor() {
+                this.backgroundMusic = null;
+                this.mediaRecorder = null;
+                this.recordedTracks = [];
+                this.isRecording = false;
+                this.audioContext = null;
+                this.stream = null;
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.initializeAudio();
+            }
+
+            initializeElements() {
+                this.elements = {
+                    musicFile: document.getElementById('musicFile'),
+                    playMusicBtn: document.getElementById('playMusicBtn'),
+                    pauseMusicBtn: document.getElementById('pauseMusicBtn'),
+                    stopMusicBtn: document.getElementById('stopMusicBtn'),
+                    playAndRecordBtn: document.getElementById('playAndRecordBtn'),
+                    musicVolume: document.getElementById('musicVolume'),
+                    musicVolumeValue: document.getElementById('musicVolumeValue'),
+                    musicProgress: document.getElementById('musicProgress'),
+                    recordBtn: document.getElementById('recordBtn'),
+                    stopRecordBtn: document.getElementById('stopRecordBtn'),
+                    recordingStatus: document.getElementById('recordingStatus'),
+                    trackList: document.getElementById('trackList'),
+                    exportBtn: document.getElementById('exportBtn'),
+                    exportMusicVolume: document.getElementById('exportMusicVolume'),
+                    exportMusicVolumeValue: document.getElementById('exportMusicVolumeValue'),
+                    exportRecordVolume: document.getElementById('exportRecordVolume'),
+                    exportRecordVolumeValue: document.getElementById('exportRecordVolumeValue')
+                };
+            }
+
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // マイク入力を取得（背景音楽を除外するための設定）
+                    this.stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: false
+                        }
+                    });
+                    this.updateStatus('準備完了', 'ready');
+                } catch (error) {
+                    this.updateStatus('マイクアクセスエラー', 'error');
+                    console.error('マイクアクセスエラー:', error);
+                }
+            }
+
+            setupEventListeners() {
+                this.elements.musicFile.addEventListener('change', (e) => this.loadMusic(e));
+                this.elements.playMusicBtn.addEventListener('click', () => this.playMusic());
+                this.elements.pauseMusicBtn.addEventListener('click', () => this.pauseMusic());
+                this.elements.stopMusicBtn.addEventListener('click', () => this.stopMusic());
+                this.elements.playAndRecordBtn.addEventListener('click', () => this.playAndRecord());
+                this.elements.musicVolume.addEventListener('input', (e) => this.setMusicVolume(e));
+                this.elements.recordBtn.addEventListener('click', () => this.startRecording());
+                this.elements.stopRecordBtn.addEventListener('click', () => this.stopRecording());
+                this.elements.exportBtn.addEventListener('click', () => this.exportTracks());
+                
+                // 合成設定のスライダー
+                this.elements.exportMusicVolume.addEventListener('input', (e) => {
+                    this.elements.exportMusicVolumeValue.textContent = e.target.value + '%';
+                });
+                this.elements.exportRecordVolume.addEventListener('input', (e) => {
+                    this.elements.exportRecordVolumeValue.textContent = e.target.value + '%';
+                });
+            }
+
+            loadMusic(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const url = URL.createObjectURL(file);
+                    this.backgroundMusic = new Audio(url);
+                    this.backgroundMusic.volume = 0.5;
+                    
+                    this.backgroundMusic.addEventListener('timeupdate', () => {
+                        if (this.backgroundMusic.duration) {
+                            const progress = (this.backgroundMusic.currentTime / this.backgroundMusic.duration) * 100;
+                            this.elements.musicProgress.style.width = progress + '%';
+                        }
+                    });
+                    
+                    this.updateStatus('音楽ファイルが読み込まれました', 'ready');
+                }
+            }
+
+            playMusic() {
+                if (this.backgroundMusic) {
+                    this.backgroundMusic.play();
+                }
+            }
+
+            pauseMusic() {
+                if (this.backgroundMusic) {
+                    this.backgroundMusic.pause();
+                }
+            }
+
+            stopMusic() {
+                if (this.backgroundMusic) {
+                    this.backgroundMusic.pause();
+                    this.backgroundMusic.currentTime = 0;
+                    this.elements.musicProgress.style.width = '0%';
+                }
+            }
+
+            setMusicVolume(event) {
+                const volume = event.target.value / 100;
+                if (this.backgroundMusic) {
+                    this.backgroundMusic.volume = volume;
+                }
+                this.elements.musicVolumeValue.textContent = event.target.value + '%';
+            }
+
+            async playAndRecord() {
+                if (!this.backgroundMusic) {
+                    alert('先に背景音楽を読み込んでください');
+                    return;
+                }
+                
+                // 背景音楽を停止してリセット
+                this.backgroundMusic.pause();
+                this.backgroundMusic.currentTime = 0;
+                
+                // 録音開始
+                await this.startRecording();
+                
+                if (this.isRecording) {
+                    // 録音開始後に音楽再生
+                    setTimeout(() => {
+                        this.backgroundMusic.play();
+                        this.updateStatus('音楽再生中・録音中...', 'recording');
+                    }, 100);
+                }
+            }
+
+            async startRecording() {
+                if (!this.stream) {
+                    alert('マイクが利用できません');
+                    return;
+                }
+
+                try {
+                    this.mediaRecorder = new MediaRecorder(this.stream);
+                    const audioChunks = [];
+
+                    this.mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    this.mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        this.addTrack(audioBlob);
+                    };
+
+                    this.mediaRecorder.start();
+                    this.isRecording = true;
+                    this.updateRecordingUI(true);
+                    this.updateStatus('録音中...', 'recording');
+
+                } catch (error) {
+                    console.error('録音開始エラー:', error);
+                    this.updateStatus('録音エラー', 'error');
+                }
+            }
+
+            stopRecording() {
+                if (this.mediaRecorder && this.isRecording) {
+                    this.mediaRecorder.stop();
+                    this.isRecording = false;
+                    this.updateRecordingUI(false);
+                    this.updateStatus('録音完了', 'ready');
+                    
+                    // 録音停止時に音楽も停止
+                    if (this.backgroundMusic) {
+                        this.backgroundMusic.pause();
+                    }
+                }
+            }
+
+            addTrack(audioBlob) {
+                const trackId = Date.now();
+                const trackData = {
+                    id: trackId,
+                    blob: audioBlob,
+                    url: URL.createObjectURL(audioBlob),
+                    name: `トラック ${this.recordedTracks.length + 1}`,
+                    volume: 1.0
+                };
+
+                this.recordedTracks.push(trackData);
+                this.renderTrackList();
+                this.updateExportButton();
+            }
+
+            renderTrackList() {
+                if (this.recordedTracks.length === 0) {
+                    this.elements.trackList.innerHTML = '<p>まだトラックがありません</p>';
+                    return;
+                }
+
+                this.elements.trackList.innerHTML = this.recordedTracks.map(track => `
+                    <div class="track-item">
+                        <div class="track-info">
+                            <span>${track.name}</span>
+                            <audio controls src="${track.url}"></audio>
+                        </div>
+                        <div class="track-controls">
+                            <input type="range" min="0" max="100" value="${track.volume * 100}" 
+                                   onchange="recorder.setTrackVolume(${track.id}, this.value)" />
+                            <button onclick="recorder.deleteTrack(${track.id})">削除</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            setTrackVolume(trackId, volume) {
+                const track = this.recordedTracks.find(t => t.id === trackId);
+                if (track) {
+                    track.volume = volume / 100;
+                }
+            }
+
+            deleteTrack(trackId) {
+                this.recordedTracks = this.recordedTracks.filter(t => t.id !== trackId);
+                this.renderTrackList();
+                this.updateExportButton();
+            }
+
+            async exportTracks() {
+                if (this.recordedTracks.length === 0) {
+                    alert('録音トラックがありません');
+                    return;
+                }
+
+                try {
+                    this.updateStatus('音声を合成中...', 'recording');
+                    
+                    // 合成設定から音量を取得
+                    const musicExportVolume = this.elements.exportMusicVolume.value / 100;
+                    const recordExportVolume = this.elements.exportRecordVolume.value / 100;
+                    
+                    // 最長の音声時間を計算
+                    let maxDuration = 0;
+                    
+                    // 背景音楽の長さを確認
+                    if (this.backgroundMusic) {
+                        maxDuration = Math.max(maxDuration, this.backgroundMusic.duration);
+                    }
+                    
+                    // 録音トラックの長さも考慮（概算）
+                    maxDuration = Math.max(maxDuration, 60); // 最低60秒確保
+                    
+                    // Web Audio APIを使用して音声を合成
+                    const offlineContext = new OfflineAudioContext(2, 44100 * maxDuration, 44100);
+                    const sources = [];
+
+                    // 背景音楽を追加（合成設定の音量を適用）
+                    if (this.backgroundMusic) {
+                        const response = await fetch(this.backgroundMusic.src);
+                        const arrayBuffer = await response.arrayBuffer();
+                        const audioBuffer = await offlineContext.decodeAudioData(arrayBuffer);
+                        
+                        const bgSource = offlineContext.createBufferSource();
+                        const bgGain = offlineContext.createGain();
+                        
+                        bgSource.buffer = audioBuffer;
+                        bgGain.gain.value = musicExportVolume; // 合成設定の音量を使用
+                        
+                        bgSource.connect(bgGain);
+                        bgGain.connect(offlineContext.destination);
+                        bgSource.start(0);
+                        sources.push(bgSource);
+                    }
+
+                    // 録音トラックを追加（合成設定の音量を適用）
+                    for (const track of this.recordedTracks) {
+                        const arrayBuffer = await track.blob.arrayBuffer();
+                        const audioBuffer = await offlineContext.decodeAudioData(arrayBuffer);
+                        
+                        const source = offlineContext.createBufferSource();
+                        const gainNode = offlineContext.createGain();
+                        
+                        source.buffer = audioBuffer;
+                        // トラック個別の音量 × 全体の録音音量設定
+                        gainNode.gain.value = track.volume * recordExportVolume;
+                        
+                        source.connect(gainNode);
+                        gainNode.connect(offlineContext.destination);
+                        source.start(0);
+                        sources.push(source);
+                    }
+
+                    // レンダリング実行
+                    const renderedBuffer = await offlineContext.startRendering();
+                    
+                    // WAVファイルに変換してダウンロード
+                    const wavBlob = this.audioBufferToWav(renderedBuffer);
+                    const url = URL.createObjectURL(wavBlob);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `tablet_de_studio_${new Date().getTime()}.wav`;
+                    a.click();
+                    
+                    URL.revokeObjectURL(url);
+                    this.updateStatus('ダウンロード完了！', 'ready');
+                    
+                } catch (error) {
+                    console.error('エクスポートエラー:', error);
+                    alert('エクスポート中にエラーが発生しました');
+                    this.updateStatus('エクスポートエラー', 'error');
+                }
+            }
+
+            audioBufferToWav(buffer) {
+                const length = buffer.length;
+                const numberOfChannels = buffer.numberOfChannels;
+                const sampleRate = buffer.sampleRate;
+                const arrayBuffer = new ArrayBuffer(44 + length * numberOfChannels * 2);
+                const view = new DataView(arrayBuffer);
+
+                // WAVヘッダーを書き込み
+                const writeString = (offset, string) => {
+                    for (let i = 0; i < string.length; i++) {
+                        view.setUint8(offset + i, string.charCodeAt(i));
+                    }
+                };
+
+                writeString(0, 'RIFF');
+                view.setUint32(4, 36 + length * numberOfChannels * 2, true);
+                writeString(8, 'WAVE');
+                writeString(12, 'fmt ');
+                view.setUint32(16, 16, true);
+                view.setUint16(20, 1, true);
+                view.setUint16(22, numberOfChannels, true);
+                view.setUint32(24, sampleRate, true);
+                view.setUint32(28, sampleRate * numberOfChannels * 2, true);
+                view.setUint16(32, numberOfChannels * 2, true);
+                view.setUint16(34, 16, true);
+                writeString(36, 'data');
+                view.setUint32(40, length * numberOfChannels * 2, true);
+
+                // 音声データを書き込み
+                let offset = 44;
+                for (let i = 0; i < length; i++) {
+                    for (let channel = 0; channel < numberOfChannels; channel++) {
+                        const sample = Math.max(-1, Math.min(1, buffer.getChannelData(channel)[i]));
+                        view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                        offset += 2;
+                    }
+                }
+
+                return new Blob([arrayBuffer], { type: 'audio/wav' });
+            }
+
+            updateRecordingUI(recording) {
+                this.elements.recordBtn.disabled = recording;
+                this.elements.stopRecordBtn.disabled = !recording;
+                this.elements.playAndRecordBtn.disabled = recording;
+                
+                if (recording) {
+                    this.elements.recordBtn.classList.add('recording');
+                    this.elements.playAndRecordBtn.classList.add('recording');
+                } else {
+                    this.elements.recordBtn.classList.remove('recording');
+                    this.elements.playAndRecordBtn.classList.remove('recording');
+                }
+            }
+
+            updateStatus(message, type) {
+                this.elements.recordingStatus.textContent = message;
+                this.elements.recordingStatus.className = `status ${type}`;
+            }
+
+            updateExportButton() {
+                this.elements.exportBtn.disabled = this.recordedTracks.length === 0;
+            }
+        }
+
+        // アプリケーション開始
+        let recorder;
+        document.addEventListener('DOMContentLoaded', () => {
+            recorder = new MultiTrackRecorder();
+        });
+    </script>
+</body>
+</html>
